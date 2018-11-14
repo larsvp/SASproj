@@ -5,7 +5,28 @@ dm 'log;clear;output;clear;';
 
 * ------------ Also store output as PDF file ----------------;
 options nodate pageno=1;
-ods pdf file='H:\statcomp\Project\Wildfire_NC.pdf' style=journal;
+
+/* Sample code to create own style*/
+proc template;
+   define style mystyle;
+   parent=styles.htmlblue;
+   style usertext from usertext /
+      foreground=blue;
+   end;
+run;
+
+ods pdf file='H:\statcomp\Project\Wildfire_NC.pdf' style=mystyle;
+
+title "SAS Homework: Wildfire analysis in the state of North Carolina - Herlinde Wynendaele - Laurens Van Paemel - Steven Vandeleene - Bart Moens ";
+footnote pageno=1;
+
+/*title2 "Introduction"*/
+ods text="The report describes the analysis of wild fire occurrences in the state of North Carolina. 
+	The data is obtained from the United States Department of Agriculture Forest Services contains data 
+	from wildfires that occurred in the United States from 1992 to 2015. 
+	In the analysis we investigate the timings, causes and fire sizes for the different counties in North Carolina.";
+run;
+title
 
 /************************************************************************
 * 1. Import the NC data and look at the descriptive portion of the data *
@@ -390,9 +411,27 @@ title;
 11.	Visualize the causes of fire versus the size by month. Make use of the sgpanel procedure. Do you observe month to month differences? Include the graph(s) in your report and discuss.
 ************************************************************************/
 
+proc sgpanel data=Project.fnc;
+  title "Causes of fire by month";
+  where STAT_CAUSE_DESCR <> "Missing/Undefined";
+  panelby STAT_CAUSE_DESCR / uniscale=row proportional spacing=1 novarname
+		HEADERATTRS=(color = 'white' size=10pt Weight=Bold)
+		HEADERBACKCOLOR='grey'
+		COLHEADERPOS=TOP;
+  vbar MONTH / datalabel;
+run;
+
 /************************************************************************
 12.	Plot the number of fires over time for the 3 main causes. Add a tickvalue for each year and rotate the labels. Include the graph in your report.
 ************************************************************************/
+
+proc sgplot data = Project.fnc; 
+where STAT_CAUSE_DESCR in ("Debris Burning", "Arson", "Equipment Use") ; 
+title "Main causes of fire over time";
+histogram FIRE_YEAR / group = STAT_CAUSE_DESCR transparency=0.5 scale= count; 
+density FIRE_YEAR / type=kernel group = STAT_CAUSE_DESCR; 
+run;
+title;
 
 /************************************************************************
 13.	Report the number of fires, the total fire size, the average fire size, and the max fire size for each of the top 3 causes. Create a table for this and include the table in your report.
