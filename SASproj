@@ -524,6 +524,8 @@ proc glm data=Project.main3 plots=all;
     model fire_size=stat_cause_descr;
     lsmeans stat_cause_descr / pdiff=all adjust=tukey;
     lsmeans stat_cause_descr / pdiff=control('Average/Typical') adjust=dunnett;
+    *Output the Anova results in order to answer question 16;
+    ods output OverallANOVA = outputTest
 run;
 quit;
 Title;
@@ -531,7 +533,13 @@ Title;
 /************************************************************************
 16.	Create a macro-value from the p-value of the previous test and write the value to the log.
 ************************************************************************/
-
+*From the results generated in question 15, take p-value is selected from the first row.;
+data _NULL_;
+	set Outputtest;
+	if _n_ = 1 then call symputx('PValue', ProbF);
+run;
+*Output the p-value to the log;
+%put &PValue;
 
 
 
