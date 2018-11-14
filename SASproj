@@ -217,8 +217,7 @@ data work.subset1;
 			FIPS_CODE = "Three-digit code from the Federal Information Process Standards (FIPS) publication 6-4 for representation of counties and equivalent entities."
 			FIPS_NAME = "County name from the FIPS publication 6-4 for representation of counties and equivalent entities.";
 	MONTH = month(datepart(DISCOVERY_DATE));
-	format	MONTH asmonth3.
-			COUNTY $countytxt.
+	format		COUNTY $countytxt.
 			STAT_CAUSE_DESCR $cause_und.;
 run; 
 
