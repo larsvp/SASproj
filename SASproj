@@ -35,17 +35,17 @@ Title1;
 proc format;
 	value asmonth
 		1 = 'Jan'                  
-		2 = 'February'
-		3 = 'March'
-		4 = 'April'
+		2 = 'Feb'
+		3 = 'Mar'
+		4 = 'Apr'
 		5 = 'May'
-		6 = 'June'
-		7 = 'July'
-		8 = 'August'
-		9 = 'September'
-		10 = 'October'
-		11 = 'November'
-		12 = 'December'
+		6 = 'Jun'
+		7 = 'Jul'
+		8 = 'Aug'
+		9 = 'Sep'
+		10 = 'Oct'
+		11 = 'Nov'
+		12 = 'Dec'
 	;
 
 	value $cause_und
@@ -308,7 +308,6 @@ title1;
 title1 font=Arial height=18pt "Number of fires per month";
 proc freq data=Project.fnc;
 	Tables MONTH / plots=freqplot(scale=freq) out = freqout;
-	format MONTH asmonth3.;
 run;
 title1; 
 
@@ -403,148 +402,45 @@ title;
 14.	Is the log transformed fire size normally distributed for each of the top 3 causes? Discuss this graphically and by formal testing. Write the graphs and the tests to an rtf file and discuss.
 ************************************************************************/
 * log transformed fire size and only the three main causes;
-
-
-
 DATA Project.fnclog;
-
-
-
-	SET Project.main3;
-
-
-
+	SET Project.fnc;
 	logtransform= log(FIRE_SIZE);
-
-
-
 	where STAT_CAUSE_DESCR in ('Arson', 'Debris Burning', 'Equipment Use');
-
-
-
 RUN;
 
-
-
-
-
-
-
 *  Is fire size normally distributed?;
-
-
-
 proc univariate data=Project.fnclog noprint;
-
-
-
   class STAT_CAUSE_DESCR;
-
-
-
   var FIRE_SIZE;
-
-
-
   histogram FIRE_SIZE / nrow=3 normal ;
-
-
-
 Run;
 
-* Fire size is not normally distributed for the 3 causes; 
-
-
-
-proc univariate data=Project.fnclog normal;
-
-  class STAT_CAUSE_DESCR;
-
-  var FIRE_SIZE;
-
-  histogram FIRE_SIZE / nrows = 3 normal ;
-
-  inset mean std="s" / format = 6.2;
-
-  qqplot FIRE_SIZE ;
-
-run;
-
-
-
 * Is the log transformed fire size normally distributed for the 3 causes?;
-
-
-
 ods select histogram;
-
-
-
 proc univariate data=Project.fnclog noprint;
-
-
-
   class STAT_CAUSE_DESCR;
-
-
-
   var logtransform;
-
-
-
   histogram logtransform / nrow=3 normal ;
-
-
-
   inset n mean std / position=ne;
-
-
-
 run;
+* Conclusion: data is not normally distributed;
 
-
-
-* Conclusion: log transformed data is not normally distributed;
-
-
-
-* Normality Test; 
-
-proc univariate data=Project.fnclog;
-
-  class STAT_CAUSE_DESCR;
-
-  var logtransform;
-
-  histogram logtransform / nrows = 3 normal ;
-
-  inset mean std="s" / format = 6.2;
-
-  qqplot logtransform ;
-
-run;
-
-*create rtf; 
 ods listing close;
 options orientation=portrait nodate nonumber;
 ods rtf file='combine_graphandtable.rtf' startpage=no nogtitle nogfootnote;
-title "Is the log transformed fire size normally distributed for each of the top 3 causes?";
-ods select histogram qqplot GoodnessOfFit;
-proc univariate data=Project.fnclog;
-
-  class STAT_CAUSE_DESCR;
-
-  var logtransform;
-
-  histogram logtransform / nrows = 3 normal ;
-
-  inset mean std="s" / format = 6.2;
-
-  qqplot logtransform ;
-
+title "test";
+PROC PRINT DATA = NormaliltyTest LABEL NOOBS;
 run;
+goptions reset=goptions;
+ods select histogram;
+proc univariate data=Project.fnclog noprint;
+ 	class STAT_CAUSE_DESCR;
+ 	var logtransform;
+ 	histogram logtransform / normal ;
+	inset n mean std / position=ne;
+run;
+quit;
 ods rtf close;
-
 
 /************************************************************************
 15.	Is there a significant difference in fire size in the year 2015 between the 3 main causes. Apply an appropriate test. Report your findings.
