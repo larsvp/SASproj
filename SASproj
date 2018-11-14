@@ -33,7 +33,7 @@ run;
 Title1;
 
 proc format;
-	value $asmonth
+	value asmonth
 		1 = 'Jan'                  
 		2 = 'February'
 		3 = 'March'
@@ -218,7 +218,8 @@ data work.subset1;
 			FIPS_NAME = "County name from the FIPS publication 6-4 for representation of counties and equivalent entities.";
 	MONTH = month(datepart(DISCOVERY_DATE));
 	format		COUNTY $countytxt.
-			STAT_CAUSE_DESCR $cause_und.;
+			STAT_CAUSE_DESCR $cause_und.
+			MONTH asmonth.;
 run; 
 
 title1 "Descriptive portion Wild fire NC region including label";
