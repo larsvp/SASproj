@@ -546,49 +546,38 @@ title;
 ************************************************************************/
 * log transformed fire size and only the three main causes;
 DATA Project.fnclog;
-	SET Project.fnc;
+	SET Project.main3;
 	logtransform= log(FIRE_SIZE);
 	where STAT_CAUSE_DESCR in ('Arson', 'Debris Burning', 'Equipment Use');
 RUN;
 
-*  Is fire size normally distributed?;
-ods exclude none;run;
-
-ods select histogram;
-proc univariate data=Project.fnclog noprint;
-  class STAT_CAUSE_DESCR;
-  var FIRE_SIZE;
-  histogram FIRE_SIZE / nrow=3 normal ;
-Run;
-
-* Is the log transformed fire size normally distributed for the 3 causes?;
-ods select histogram;
+* Is the log transformed fire size normally distributed for the 3 causes? graphically & formal testing;
+ods select histogram qqplot GoodnessOfFit;
+ods graphics/ height=800px width=700px; 
 proc univariate data=Project.fnclog noprint;
   class STAT_CAUSE_DESCR;
   var logtransform;
-  histogram logtransform / nrow=3 normal ;
+  histogram logtransform / nrow=3 normal odstitle="Histogram for the top 3 Fire causes";
+  qqplot logtransform/ nrow=3 normal odstitle="QQ-plot for the top 3 Fire causes"; 
   inset n mean std / position=ne;
 run;
+* Conclusion: log transformed data is not normally distributed - P-value is < 0.05 (we may assume data is not normally distributed);
 
-ods text="\n\nConclusion: data is not normally distributed.\n";
 
-* Conclusion: data is not normally distributed;
-
+*create rtf; 
 ods listing close;
 options orientation=portrait nodate nonumber;
 ods rtf file='combine_graphandtable.rtf' startpage=no nogtitle nogfootnote;
-title "test";
-PROC PRINT DATA = NormaliltyTest LABEL NOOBS;
-run;
-goptions reset=goptions;
-ods select histogram;
+title "Is the log transformed fire size normally distributed for each of the top 3 causes?";
+ods select histogram qqplot GoodnessOfFit;
+ods graphics/ height=800px width=700px; 
 proc univariate data=Project.fnclog noprint;
- 	class STAT_CAUSE_DESCR;
- 	var logtransform;
- 	histogram logtransform / normal ;
-	inset n mean std / position=ne;
+  class STAT_CAUSE_DESCR;
+  var logtransform;
+  histogram logtransform / nrow=3 normal odstitle="Histogram for the top 3 Fire causes";
+  qqplot logtransform/ nrow=3 normal odstitle="QQ-plot for the top 3 Fire causes"; 
+  inset n mean std / position=ne;
 run;
-quit;
 ods rtf close;
 
 ods exclude all;run;
