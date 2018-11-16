@@ -230,7 +230,7 @@ data work.subset1;
 			DISCOVERY_DOY = "Day of year on which the fire was discovered or confirmed to exist."
 			DISCOVERY_TIME = "Time of day that the fire was discovered or confirmed to exist."
 			STAT_CAUSE_CODE = "Code for the (statistical) cause of the fire."
-			STAT_CAUSE_DESCR = "Description of the (statistical) cause of the fire."
+			STAT_CAUSE_DESCR = "Cause of the fire."
 			CONT_DATE = "Date on which the fire was declared contained or otherwise controlled (mm/dd/yyyy where mm=month, dd=day, and yyyy=year)."	
 			CONT_DOY = "Day of year on which the fire was declared contained or otherwise controlled."
 			CONT_TIME = "Time of day that the fire was declared contained or otherwise controlled (hhmm where hh=hour, mm=minutes)."
