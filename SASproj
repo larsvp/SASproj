@@ -474,16 +474,6 @@ proc sgpanel data=Project.fnc;
   where STAT_CAUSE_DESCR <> "Missing/Undefined";
   panelby STAT_CAUSE_DESCR / uniscale=row proportional spacing=1 novarname
 		HEADERATTRS=(color = 'white' size=10pt Weight=Bold)
-
-title 'Top 3 causes of fire size: descriptive statistics' ;
-proc tabulate data = Project.main3 format = 8.3  S=[foreground=black just=c cellwidth=120];
-class STAT_CAUSE_DESCR/order=freq  style={font_style=italic} ;
-var FIRE_SIZE/style={font_style=italic};
-table STAT_CAUSE_DESCR, FIRE_SIZE*(N sum mean max);
-label STAT_CAUSE_DESCR='Top 3 causes of fire' FIRE_SIZE='Fire Size: Estimate of acres within the final perimeter of the fire' ; 
-keylabel N='Number of fires' Sum='Total size' Mean='Average size' Max='Maximum size'; 
-run;
-title;
 		HEADERBACKCOLOR='grey'
 		COLHEADERPOS=TOP;
   vbar MONTH / datalabel;
