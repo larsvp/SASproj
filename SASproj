@@ -62,7 +62,7 @@ Title1;
 
 proc format;
 	value asmonth
-		1 = 'Jan'                  
+		1 = 'January'                  
 		2 = 'February'
 		3 = 'March'
 		4 = 'April'
@@ -247,7 +247,7 @@ data work.subset1;
 	MONTH = month(datepart(DISCOVERY_DATE));
 	format		COUNTY $countytxt.
 			STAT_CAUSE_DESCR $cause_und.
-			MONTH asmonth.;
+			MONTH asmonth3.;
 run; 
 
 /* Include in ODS */ 
