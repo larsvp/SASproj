@@ -1,6 +1,5 @@
 * Clear eveything in the result viewer before running code;
-ODS HTML CLOSE;
-ODS HTML;
+ODS HTML CLOSE; ODS HTML;
 dm 'log;clear;output;clear;';
 
 * ------------ Also store output as PDF file ----------------;
@@ -10,9 +9,7 @@ options nodate topmargin=.25in bottommargin=.25in leftmargin=.25in rightmargin=.
 proc template;
    define style mystyle;
    parent=styles.htmlblue;
-   style usertext from usertext /
-      foreground=blue
-	end;
+   style usertext from usertext / foreground=blue end;
 run;
 
 ods escapechar='\';
