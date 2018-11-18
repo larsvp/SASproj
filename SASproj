@@ -323,6 +323,23 @@ title;
 
 ods exclude all;run;
 
+/* Plot for Word doc*/
+data Fnc_means_sub;
+	set Fnc_means (obs = 10);
+run;
+
+proc print data = Fnc_means_sub (obs=20);
+run;
+
+title 'Top 10 counties with the largest average fire size';
+proc sgplot data = Fnc_means_sub;
+	label county = 'County'
+		  average = 'Average fire size';
+	vbar county / response = average;
+	;
+run;
+title;
+
 /************************************************************************
 11.	Visualize the causes of fire versus the size by month. Make use of the sgpanel procedure. 
 Do you observe month to month differences? Include the graph(s) in your report and discuss.
