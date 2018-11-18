@@ -4,15 +4,15 @@ ODS HTML;
 dm 'log;clear;output;clear;';
 
 * ------------ Also store output as PDF file ----------------;
-options nodate;
+options nodate topmargin=.25in bottommargin=.25in leftmargin=.25in rightmargin=.25in; run;
 
 /* Sample code to create own style*/
 proc template;
    define style mystyle;
    parent=styles.htmlblue;
    style usertext from usertext /
-      foreground=blue;
-   end;
+      foreground=blue
+	end;
 run;
 
 ods escapechar='\';
@@ -21,21 +21,16 @@ ods pdf file='H:\statcomp\Project\Wildfire_NC.pdf' style=mystyle;
 title1 "SAS Homework: Wildfire analysis in the state of North Carolina \nHerlinde Wynendaele - Laurens Van Paemel - Steven Vandeleene - Bart Moens ";
 footnote 'Page \{thispage}';
 title2 "\n\nIntroduction";
-ods text="\nThe report describes the analysis of wild fire occurrences in the state of North Carolina. 
+ods text="The report describes the analysis of wild fire occurrences in the state of North Carolina. 
 The data is obtained from the United States Department of Agriculture Forest Services contains data 
 from wildfires that occurred in the United States from 1992 to 2015. In the analysis we investigate the timings, 
-causes and fire sizes for the different counties in North Carolina.\n";
+causes and fire sizes for the different counties in North Carolina.\n\n";
 run;
 title;
-
 
 /************************************************************************
 * 1. Import the NC data and look at the descriptive portion of the data *
 ************************************************************************/
-
-
-
-
 * Set library;
 libname Project "H:\statcomp\Project";
 
@@ -50,9 +45,6 @@ proc import OUT= project.FireNC
 	datarow=2;
 	guessingrows=10000;
 run; 
-
-proc print data = project.FireNC (obs=5);
-run;
 
 * 1. b. Descriptive portion of the data; 
 title1 "Descriptive portion Wild fire NC region";
@@ -251,18 +243,13 @@ data work.subset1;
 run; 
 
 /* Include in ODS */ 
-ods exclude none;run;   
-ods select = "Attributes";
-
 title1 "Descriptive portion Wild fire NC region including label";
 proc contents data=work.subset1;
 run;
 Title1;
 
-ods exclude all;run;
-
 /************************************************************************
-* 2. Create a permanent dataset the keeping following variables...      *
+* 2. Create a permanent dataset  keeping following variables...      *
 ************************************************************************/
 
 DATA Project.fnc;
@@ -270,19 +257,20 @@ DATA Project.fnc;
     keep state county fips_code discovery_date fire_year fire_size latitude longitude stat_cause_code stat_cause_descr fire_size_class month;
 RUN;
 
-ods exclude none;run;
-
+ods exclude none; run;
+ods pdf startpage=no;
 * Display the first five rows of the new table;
 title1 "Top 5 Observations of the data set used for further analysis";
 proc print data = project.fnc (obs=5);
+format latitude comma10.2 longitude comma10.2;
 run;
 title1;
 
-ods text="\nData has formatted: months and counties are formatted as text rather than numbers and labels with information are added to each variable. 
-Above a sample of the data set that will be used for further analysis\n";
+ods text="\nData has been formatted: months and counties are formatted as text rather than numbers and labels with information are added to each variable. 
+ Above a sample of the data set that will be used for further analysis\n";
 run;
 
-ods exclude all;run; 
+ods exclude all; run; 
 
 * Subset of the 3 main causes (later questions);
 data Project.main3;
@@ -293,23 +281,15 @@ run;
 /************************************************************************
 * 3. How many levels are there for each character variable?             *
 ************************************************************************/
-
 %let categorical = state county fips_code fire_year stat_cause_code stat_cause_descr ;
 %let interval = discovery_date fire_size latitude longitude ;
 
-ods exclude none;run; 
-
 * Amount of levels and missing values for each variable with a character format;
-ods select = "OneWayFreqs";
-title1 "Categorical Variables: amount of levels and missing values";
+title1  "Categorical Variables: amount of levels and missing values";
 proc freq data = Project.fnc nlevels;
 	tables &categorical;
 run;
 title1;
-
-ods text="\n\nIdentification of levels and missing values. \n";
-
-ods exclude all;run; 
 
 * Get the levels and their freq count of each variable with a character format;
 title1 "Categorical Variable Frequency Analysis";
@@ -326,6 +306,8 @@ Title1;
 
 * Display missing data pattern;
 ods exclude none;run; 
+ods pdf startpage=no;
+ods trace on
 ods select = "MissPattern";
 
 title1 "Missing data pattern numeric variables";
@@ -351,7 +333,6 @@ proc univariate data=Project.fnc;
 run;
 Title1;
 
-
 /************************************************************************
 * 7. Investigate the months with the highest number of fires. Visualise *
 * this with a plot and display the month with 3 characters. Include the *
@@ -361,9 +342,11 @@ Title1;
 * Investigate the months with the highest number of fires;
 
 ods exclude none;run; 
+ods pdf startpage=no;
+ods trace on;
 ods select = "FreqPlot";
 
-title1 font=Arial height=18pt "Number of fires per month";
+title1 "Number of fires per month";
 proc freq data=Project.fnc;
 	Tables MONTH / plots=freqplot(scale=freq) out = freqout;
 run;
@@ -378,8 +361,8 @@ ods exclude all;run;
 
 *optie 1;
 ods exclude none;run; 
-
-title1 font=Arial height=18pt "Number of fires per cause";
+ods pdf startpage=no;
+title1 "Number of fires per cause";
 proc sgplot data=Project.fnc;
 	vbar STAT_CAUSE_DESCR / CATEGORYORDER=RESPDESC;
 	xaxis label = "Cause of fire";
@@ -404,7 +387,6 @@ title1;
 ************************************************************************/
 *Calculate N Mean LCLM UCLM by county.;
 
-
 proc means data = Project.fnc N Mean LCLM UCLM;
 		var FIRE_SIZE;
 		class  COUNTY;
@@ -416,10 +398,11 @@ proc sort data = fnc_means;
 run;
 *Print the first observation having the highest average fire_size;
 ods exclude none;run;
-
+ods pdf startpage=no;
+title1 "Observation with highest average fire size";
 proc print data = fnc_means (obs = 1);
 run;
-
+title1;
 ods exclude all;run;
 
 /************************************************************************
@@ -449,7 +432,7 @@ data Fnc_top10_selection;
 run;
 
 ods exclude none;run;
-
+ods pdf startpage=no;
 title 'Top 10 counties with the largest average fire size';
 proc sgplot data = fnc_top10_selection;
 	label county = 'County'
@@ -460,7 +443,6 @@ run;
 title;
 
 ods exclude all;run;
-
 
 /************************************************************************
 11.	Visualize the causes of fire versus the size by month. Make use of the sgpanel procedure. 
@@ -502,7 +484,7 @@ proc sgplot data = Project.fnc;
 run;
 
 ods exclude none;run;
-
+ods pdf startpage=no;
 proc sgplot data = Project.fnc; 
 where STAT_CAUSE_DESCR in ("Debris Burning", "Arson", "Equipment Use") ; 
 title "Main causes of fire over time";
@@ -513,12 +495,12 @@ title;
 
 ods exclude all;run;
 
-
 /************************************************************************
 13.	Report the number of fires, the total fire size, the average fire size, and the max fire size for each of the top 3 causes. 
 Create a table for this and include the table in your report.
 ************************************************************************/
-
+ods exclude none;run;
+ods pdf startpage=no;
 
 title 'Top 3 causes of fire size: descriptive statistics' ;
 proc tabulate data = Project.main3 format = 8.3  S=[foreground=black just=c cellwidth=120];
@@ -530,6 +512,7 @@ keylabel N='Number of fires' Sum='Total size' Mean='Average size' Max='Maximum s
 run;
 title;
 
+ods exclude all;run;
 
 /************************************************************************
 14.	Is the log transformed fire size normally distributed for each of the top 3 causes? Discuss this graphically and by formal testing. Write the graphs and the tests to an rtf file and discuss.
@@ -552,7 +535,6 @@ proc univariate data=Project.fnclog noprint;
   inset n mean std / position=ne;
 run;
 * Conclusion: log transformed data is not normally distributed - P-value is < 0.05 (we may assume data is not normally distributed);
-
 
 *create rtf; 
 ods listing close;
@@ -584,6 +566,7 @@ RUN;
 
 * Excluding the extreme most outliers;
 ods exclude none;run;
+ods pdf startpage=no;
 
 Title "Vertical boxplot of the fire sizes by most common causes";
 proc sgplot data=Project.main3_no_outliers;
@@ -632,15 +615,5 @@ run;
 *Output the p-value to the log;
 %put &PValue;
 
-
 ods pdf close;
-
-
-
-
-
-
-
-
-
 
