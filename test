@@ -14,11 +14,12 @@ run;
 
 ods escapechar='\';
 ods pdf file='H:\statcomp\Project\Wildfire_NC.pdf' style=mystyle;
+ods pdf exclude all;
 
 title1 "SAS Homework: Wildfire analysis in the state of North Carolina \nHerlinde Wynendaele - Laurens Van Paemel - Steven Vandeleene - Bart Moens ";
 footnote 'Page \{thispage}';
 title2 "\n\nIntroduction";
-ods text="Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
+ods pdf text="Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
  Wildfires harm both air and water quality while efforts to fight wildfires are expensive and put emergency personel in harms way.
  A better understanding of the dynamics behind destructive wildfires can aid prevention efforts. This report analyses the causes,
  timings and sizes of wildfires accross different counties in NC. The data is obtained from the United States Forest Service (USFS)
@@ -46,8 +47,6 @@ proc import OUT= project.FireNC
 	datarow=2;
 	guessingrows=10000;
 run; 
-
-ods pdf exclude all;
 
 ods HTML select Contents.DataSet.Variables;
 * 1. b. Descriptive portion of the data; 
@@ -147,14 +146,13 @@ DATA Project.fnc;
     keep state county fips_code DISCOVERY_DATE fire_year fire_size latitude longitude STAT_CAUSE_CODE STAT_CAUSE_DESCR fire_size_class month;
 RUN;
 
-ods pdf exclude none;
-
+ods PDF select Print.Print;
 * Display the first five rows of the new table;
 title1 "Top 5 Observations of the data set used for further analysis";
 proc print data = project.fnc (obs=5) LABEL;
   label	month='Month' fire_year='Year' fire_size='Fire size' latitude='Latitude' longitude='Longitude' STAT_CAUSE_CODE='Cause code'
 		STATE='State' COUNTY='County' STAT_CAUSE_DESCR='Cause' fips_code='Fips code' FIRE_SIZE_CLASS='Fire size class' DISCOVERY_DATE='Discovery date';
-  format latitude comma10.2 longitude comma10.2 DISCOVERY_DATE datetime7.;;
+  format latitude comma10.2 longitude comma10.2 DISCOVERY_DATE datetime7.;
 run;
 title1;
 
@@ -218,10 +216,9 @@ Title1;
 * graph in your report and discuss.                                     *
 ************************************************************************/
 
-ods PDF graphics on / width=4in height=2.5in;
+ods graphics on / width=4in height=2.5in;
 ods PDF select Freq.Table1.OneWayFreqPlots.FreqPlot;
 * Investigate the months with the highest number of fires;
-ods trace on;
 title1 "Number of fires per month";
 proc freq data=Project.fnc;
 	Tables MONTH / plots=freqplot(scale=freq) out = freqout;
@@ -233,9 +230,7 @@ title1;
 * What is the major cause? Include the graph in your report and discuss.*
 ************************************************************************/
 
-*optie 1;
-ods exclude none;run; 
-ods pdf startpage=no;
+ods PDF select SGPlot.SGPlot;
 title1 "Number of fires per cause";
 proc sgplot data=Project.fnc;
 	vbar STAT_CAUSE_DESCR / CATEGORYORDER=RESPDESC;
@@ -243,14 +238,5 @@ proc sgplot data=Project.fnc;
 	Yaxis label = "frequency";
 run;
 Title;
-
-ods exclude all;run;
-
-* Optie 2;
-title1 "(statistical) Cause of fire: frequency plot";
-proc freq data=Project.fnc order=freq;
- table STAT_CAUSE_DESCR / plots=freqplot;
-run;
-title1;
 
 ods pdf close;
