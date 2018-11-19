@@ -156,10 +156,6 @@ proc print data = project.fnc (obs=5) LABEL;
 run;
 title1;
 
-ods PDF text="\nData has been formatted: months and counties are formatted as text rather than numbers and labels with information are added to each variable. 
- Above a sample of the data set that will be used for further analysis\n";
-run;
-
 * Subset of the 3 main causes (later questions);
 data Project.main3;
 	set Project.fnc;
@@ -174,11 +170,17 @@ run;
 
 ods select Freq.NLevels;
 * Amount of levels and missing values for each variable with a character format;
-title1  "Categorical Variables: amount of levels and missing values";
+title1  "Categorical Variables: the amount of levels and missing values";
 proc freq data = Project.fnc nlevels;
 	tables &categorical;
 run;
 title1;
+
+ods PDF text="The table displays the number of levels for each categorical variable.
+ The values for the state variable are all the same, namely 'NC' as a reference to the
+ state of North-Carolina. Both the county and fips_code variables have 100 different
+ levels and missing values. The data spans accross 24 years and contains thirteen
+ different categories for causes.\n\n";
 
 /************************************************************************
 * 4. Check for inconsistencies in the data. Count missing values for    *
@@ -210,6 +212,10 @@ proc univariate data=Project.fnc;
 run;
 Title1;
 
+ods PDF text="There do not appear to be any inconsistencies in any continuous variables. However, the size of the wildfires is skewed
+ to the right, with a few unusually large wildfires. The most extreme observation being a wildfire which, according to the data, burned
+ 45294 acres of land. There's no reason to assume these extreme values are errors as they appear to be realistic.\n\n";
+
 /************************************************************************
 * 7. Investigate the months with the highest number of fires. Visualise *
 * this with a plot and display the month with 3 characters. Include the *
@@ -223,7 +229,9 @@ title1 "Number of fires per month";
 proc freq data=Project.fnc;
 	Tables MONTH / plots=freqplot(scale=freq) out = freqout;
 run;
-title1; 
+title1;
+
+ods PDF text="During late winter and early spring wildfires occure more often while summer is the calmest period.\n\n";
 
 /************************************************************************
 * 8. Create a bar chart displaying the number of fires for each cause.  *
@@ -239,6 +247,10 @@ proc sgplot data=Project.fnc;
 run;
 Title;
 
+ods PDF text="By far the main cause of forest fires is debris burning, which accounts for more than one third of all wildfires.
+ A distant second is Arson. The third most common official cause is equipment use, which has barely been documented more often compared
+ to wildfires caused by children. However, the large amount of unknown causes leaves some room for ambiguity.\n\n";
+
 /************************************************************************
 * 9. Which county had the biggest fires on average? Create a SAS        *
 * dataset including the number of observations, the mean values and the *
@@ -248,14 +260,17 @@ Title;
 ods PDF exclude Means.Summary;
 *Calculate N Mean LCLM UCLM by county.;
 proc means data = Project.fnc N Mean LCLM UCLM;
- var FIRE_SIZE;
- class COUNTY;
- output out=fnc_all_means N=n_obs mean=average LCLM=lower_CI UCLM=upper_CI;
+  var FIRE_SIZE;
+  class COUNTY;
+  output out=fnc_all_means N=n_obs mean=average LCLM=lower_CI UCLM=upper_CI;
 run;
 
+ods pdf exclude Print.Print;
 *Sort by average descending.;
 proc sort data=fnc_all_means out=Project.fnc_means;
-by descending Average;
+  by descending Average;
+run;
+proc print data = Project.fnc_means;
 run;
 
 ods PDF select Print.Print;
@@ -264,6 +279,8 @@ title1 "Observation with highest average fire size";
 proc print data = Project.fnc_means (obs = 1);
 run;
 title1;
+
+ods PDF text="The county with historically the largest average fire size is Pender, where wildfires have on average burned 77.76 acres each.\n\n";
 
 /************************************************************************
 10. Select these 10 counties from the original dataset and visualise the data (displaying the average). Include the graph in your report.
@@ -283,6 +300,8 @@ xaxis values=(&top10counties);
 run;
 title;
 
+ods PDF text="The bar chart displays the 10 counties where historically the average fire size has been the largest. The county of Pender clearly towers above the others.\n\n";
+
 /************************************************************************
 11.	Visualize the causes of fire versus the size by month. Make use of the sgpanel procedure. 
 Do you observe month to month differences? Include the graph(s) in your report and discuss.
@@ -298,6 +317,9 @@ proc sgpanel data=Project.fnc;
 		COLHEADERPOS=TOP;
   vbar MONTH / datalabel;
 run;
+
+ods PDF text="With the exception of lightning and fireworks, most causes follow the same trend. Namely a spike in late winter and early spring,
+ while summer has the least occurences of wildfires. Fireworks and lightning go against the trend as they more often cause wildfires during summer.\n\n";
 
 /************************************************************************
 12.	Plot the number of fires over time for the 3 main causes. Add a tickvalue for each year and rotate the labels. Include the graph in your report.
@@ -382,5 +404,4 @@ run;
 %put &PValue;
 
 ods pdf close;
-
 
