@@ -3,13 +3,13 @@ ODS HTML CLOSE; ODS HTML;
 dm 'log;clear;output;clear;';
 
 * ------------ Also store output as PDF file ----------------;
-options nodate topmargin=.25in bottommargin=.25in leftmargin=.25in rightmargin=.25in; run;
+options nodate topmargin=.25in bottommargin=.25in leftmargin=.25in rightmargin=.25in center; run;
 
 /* Sample code to create own style*/
 proc template;
 	define style mystyle;
-	parent=styles.htmlblue;
-	style usertext from usertext / foreground=blue;
+		parent=styles.htmlblue;
+		style usertext from usertext / foreground=blue;
 	end;
 run;
 
@@ -19,7 +19,7 @@ ods pdf file='H:\statcomp\Project\Wildfire_NC.pdf' style=mystyle startpage=no;
 title1 "SAS Homework: Wildfire analysis in the state of North Carolina \nHerlinde Wynendaele - Laurens Van Paemel - Steven Vandeleene - Bart Moens ";
 footnote 'Page \{thispage}';
 title2 "\n\nIntroduction";
-ods pdf text="Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
+ods pdf text="\S={just=c}Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
  Wildfires harm both air and water quality while efforts to fight wildfires are expensive and put emergency personel in harms way.
  A better understanding of the dynamics behind destructive wildfires can aid prevention efforts. This report analyses the causes,
  timings and sizes of wildfires accross different counties in NC. The data is obtained from the United States Forest Service (USFS)
@@ -170,13 +170,13 @@ run;
 
 ods select Freq.NLevels;
 * Amount of levels and missing values for each variable with a character format;
-title1  "Categorical Variables: the amount of levels and missing values";
+title1 "Categorical Variables: the amount of levels and missing values";
 proc freq data = Project.fnc nlevels;
 	tables &categorical;
 run;
 title1;
 
-ods PDF text="The table displays the number of levels for each categorical variable.
+ods PDF text="\S={just=c}The table displays the number of levels for each categorical variable.
  The values for the state variable are all the same, namely 'NC' as a reference to the
  state of North-Carolina. Both the county and fips_code variables have 100 different
  levels and missing values. The data spans accross 24 years and contains thirteen
@@ -212,7 +212,7 @@ proc univariate data=Project.fnc;
 run;
 Title1;
 
-ods PDF text="There do not appear to be any inconsistencies in any continuous variables. However, the size of the wildfires is skewed
+ods PDF text="\S={just=c}There do not appear to be any inconsistencies in any continuous variables. However, the size of the wildfires is skewed
  to the right, with a few unusually large wildfires. The most extreme observation being a wildfire which, according to the data, burned
  45294 acres of land. There's no reason to assume these extreme values are errors as they appear to be realistic.\n\n";
 
@@ -222,7 +222,8 @@ ods PDF text="There do not appear to be any inconsistencies in any continuous va
 * graph in your report and discuss.                                     *
 ************************************************************************/
 
-ods graphics on / width=4in height=2.5in;
+ods pdf columns=2;
+ods graphics on / width=3.5in height=2.5in;
 ods PDF select Freq.Table1.OneWayFreqPlots.FreqPlot;
 * Investigate the months with the highest number of fires;
 title1 "Number of fires per month";
@@ -231,7 +232,7 @@ proc freq data=Project.fnc;
 run;
 title1;
 
-ods PDF text="During late winter and early spring wildfires occure more often while summer is the calmest period.\n\n";
+ods PDF text="\S={just=c}During late winter and early spring wildfires occure more often while summer is the calmest period.\n\n";
 
 /************************************************************************
 * 8. Create a bar chart displaying the number of fires for each cause.  *
@@ -247,7 +248,7 @@ proc sgplot data=Project.fnc;
 run;
 Title;
 
-ods PDF text="By far the main cause of forest fires is debris burning, which accounts for more than one third of all wildfires.
+ods PDF text="\S={just=c}By far the main cause of forest fires is debris burning, which accounts for more than one third of all wildfires.
  A distant second is Arson. The third most common official cause is equipment use, which has barely been documented more often compared
  to wildfires caused by children. However, the large amount of unknown causes leaves some room for ambiguity.\n\n";
 
@@ -280,7 +281,7 @@ proc print data = Project.fnc_means (obs = 1);
 run;
 title1;
 
-ods PDF text="The county with historically the largest average fire size is Pender, where wildfires have on average burned 77.76 acres each.\n\n";
+ods PDF text="\S={just=c}The county with historically the largest average fire size is Pender, where wildfires have on average burned 77.76 acres each.\n\n";
 
 /************************************************************************
 10. Select these 10 counties from the original dataset and visualise the data (displaying the average). Include the graph in your report.
@@ -300,14 +301,14 @@ xaxis values=(&top10counties);
 run;
 title;
 
-ods PDF text="The bar chart displays the 10 counties where historically the average fire size has been the largest. The county of Pender clearly towers above the others.\n\n";
+ods PDF text="\S={just=c}The bar chart displays the 10 counties where historically the average fire size has been the largest. The county of Pender clearly towers above the others.\n\n";
 
 /************************************************************************
 11.	Visualize the causes of fire versus the size by month. Make use of the sgpanel procedure. 
 Do you observe month to month differences? Include the graph(s) in your report and discuss.
 ************************************************************************/
 
-ods PDF select SGPanel.SGPanel;
+ods PDF select SGPanel.SGPanel startpage=yes;
 proc sgpanel data=Project.fnc;
   title "Causes of fire by month";
   where STAT_CAUSE_DESCR <> "Missing/Undefined";
@@ -318,7 +319,7 @@ proc sgpanel data=Project.fnc;
   vbar MONTH / datalabel;
 run;
 
-ods PDF text="With the exception of lightning and fireworks, most causes follow the same trend. Namely a spike in late winter and early spring,
+ods PDF text="\S={just=c}With the exception of lightning and fireworks, most causes follow the same trend. Namely a spike in late winter and early spring,
  while summer has the least occurences of wildfires. Fireworks and lightning go against the trend as they more often cause wildfires during summer.\n\n";
 
 /************************************************************************
@@ -330,7 +331,7 @@ ods PDF text="With the exception of lightning and fireworks, most causes follow 
 Create a table for this and include the table in your report.
 ************************************************************************/
 
-ods PDF select Tabulate.Report.Table;
+ods PDF select Tabulate.Report.Table startpage=no;
 title 'Top 3 causes of fire size: descriptive statistics' ;
 proc tabulate data = Project.main3 format = 8.3  S=[foreground=black just=c cellwidth=120];
 class STAT_CAUSE_DESCR/order=freq  style={font_style=italic} ;
