@@ -383,22 +383,6 @@ ods exclude all;run;
 12.	Plot the number of fires over time for the 3 main causes. Add a tickvalue for each year and rotate the labels. Include the graph in your report.
 ************************************************************************/
 
-data Project.main3;
-	set Project.fnc2;
-	where STAT_CAUSE_DESCR in ('Arson', 'Debris Burning', 'Equipment Use');
-run;
-
-proc print data = Project.fnc (obs=20);
-run;
-
-proc sgplot data = Project.fnc;
-	vbar STAT_CAUSE_DESCR;
-run;
-
-proc sgplot data = Project.fnc;
-	waterfall CATEGORY=STAT_CAUSE_DESCR RESPONSE=FIRE_SIZE / DATALABEL FINALBARTICKVALUE='Total Fires';
-run;
-
 ods exclude none;run;
 ods pdf startpage=no;
 proc sgplot data = Project.fnc; 
@@ -408,7 +392,16 @@ histogram FIRE_YEAR / group = STAT_CAUSE_DESCR transparency=0.5 scale= count;
 density FIRE_YEAR / type=kernel group = STAT_CAUSE_DESCR; 
 run;
 title;
+ods exclude all;run;
 
+ods exclude none;run;
+ods pdf startpage=no;
+proc sgplot data = Project.fnc; 
+where STAT_CAUSE_DESCR in ("Debris Burning", "Arson", "Equipment Use") ; 
+title "Main causes of fire over time";
+vline FIRE_YEAR / group = STAT_CAUSE_DESCR MARKERS; 
+run;
+title;
 ods exclude all;run;
 
 /************************************************************************
