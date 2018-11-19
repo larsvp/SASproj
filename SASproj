@@ -285,60 +285,80 @@ title1;
 ods exclude all;run;
 
 /************************************************************************
-10.	Select these 10 counties from the original dataset and visualise the data (displaying the average). Include the graph in your report.
+10. Select these 10 counties from the original dataset and visualise the data (displaying the average). Include the graph in your report.
 ************************************************************************/
+*Solution 1;
 *Create subset of top 10 counties;
-data Fnc_means_sub;
-	set Fnc_means (obs = 10);
-	keep county;
+data Project.fnc_county_selection;
+input county $;
+datalines;
+Pender
+Craven
+Carteret
+Graham
+Burke
+Hyde
+Pamlico
+Halifax
+Camden
+Robeson
+;
 run;
 
-*Sort the initial dataset and the Fnc_means_sub dataset by the variable that will be merged;
+*Sort the initial dataset and the fnc_county_selection dataset by the variable county;
 proc sort data = Project.Fnc out = Fnc_sorted;
-	by county;
+by county;
 run;
 
-proc sort data = Fnc_means_sub;
-	by county;
+proc sort data = Project.fnc_county_selection out = fnc_county_selection_sort;
+by county;
 run;
 
 *Create a dataset based on the top 10 counties;
 data Fnc_top10_selection;
-	merge Fnc_means_sub (in = mean)
-			Fnc_sorted (in = full);
-	by county;
-	if mean = 1 and full = 1;
+merge fnc_county_selection_sort (in = mean)
+Fnc_sorted (in = full);
+by county;
+if mean = 1 and full = 1;
 run;
 
 ods exclude none;run;
 ods pdf startpage=no;
 title 'Top 10 counties with the largest average fire size';
 proc sgplot data = fnc_top10_selection;
-	label county = 'County'
-		  fire_size = 'Average fire size';
-	vbar county / response = fire_size stat = mean;
-	;
+label county = 'County'
+  fire_size = 'Average fire size';
+vbar county / response = fire_size stat = mean;
+;
 run;
 title;
 
 ods exclude all;run;
 
 /* Plot for Word doc*/
-data Fnc_means_sub;
-	set Fnc_means (obs = 10);
-run;
-
-proc print data = Fnc_means_sub (obs=20);
-run;
-
 title 'Top 10 counties with the largest average fire size';
-proc sgplot data = Fnc_means_sub;
-	label county = 'County'
-		  average = 'Average fire size';
-	vbar county / response = average;
-	;
+proc sgplot data = fnc_top10_selection;
+label county = 'County'
+  	fire_size = 'Average fire size';
+vbar county / response = fire_size stat = mean;
+;
 run;
 title;
+
+/*Alternative solution*/
+Proc Sql noprint;
+Select quote(county) into :top10counties separated by ' ' from fnc_means(obs=10);
+Quit;
+
+title 'Top 10 counties with the largest average fire size';
+proc sgplot data = Project.fnc;
+label county = 'County'
+   fire_size = 'Average fire size';
+vbar county / response=fire_size stat=mean CATEGORYORDER=RESPDESC;
+xaxis values=(&top10counties);
+run;
+title;
+
 
 /************************************************************************
 11.	Visualize the causes of fire versus the size by month. Make use of the sgpanel procedure. 
@@ -467,6 +487,7 @@ ods pdf startpage=no;
 Title "Vertical boxplot of the fire sizes by most common causes";
 proc sgplot data=Project.main3_no_outliers;
     vbox fire_size / category=stat_cause_descr connect=mean;
+	where fire_year = 2015;
 run;
 Title;
 
@@ -474,6 +495,7 @@ Title;
 Title "Vertical boxplot of the fire sizes by most common causes";
 proc sgplot data=Project.main3;
     vbox fire_size / category=stat_cause_descr connect=mean;
+	where fire_year = 2015;
 run;
 Title;
 
@@ -484,15 +506,17 @@ proc glm data=Project.main3 plots=diagnostics;
    class stat_cause_descr;
    model fire_size = stat_cause_descr / solution ss3;
    means stat_cause_descr / hovtest=levene;
+   where fire_year = 2015;
    *format stat_cause_descr $stat_cause_descr.;
 run;
 Title;
-
+ods output OverallANOVA = outputtest;
 proc glm data=Project.main3 plots=all;
     class stat_cause_descr;
     model fire_size=stat_cause_descr;
     lsmeans stat_cause_descr / pdiff=all adjust=tukey;
     lsmeans stat_cause_descr / pdiff=control('Average/Typical') adjust=dunnett;
+	where fire_year = 2015;
 run;
 quit;
 Title;
