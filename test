@@ -1,0 +1,256 @@
+* Clear eveything in the result viewer before running code;
+ODS HTML CLOSE; ODS HTML;
+dm 'log;clear;output;clear;';
+
+* ------------ Also store output as PDF file ----------------;
+options nodate topmargin=.25in bottommargin=.25in leftmargin=.25in rightmargin=.25in; run;
+
+/* Sample code to create own style*/
+proc template;
+   define style mystyle;
+   parent=styles.htmlblue;
+   style usertext from usertext / foreground=blue end;
+run;
+
+ods escapechar='\';
+ods pdf file='H:\statcomp\Project\Wildfire_NC.pdf' style=mystyle;
+
+title1 "SAS Homework: Wildfire analysis in the state of North Carolina \nHerlinde Wynendaele - Laurens Van Paemel - Steven Vandeleene - Bart Moens ";
+footnote 'Page \{thispage}';
+title2 "\n\nIntroduction";
+ods text="Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
+ Wildfires harm both air and water quality while efforts to fight wildfires are expensive and put emergency personel in harms way.
+ A better understanding of the dynamics behind destructive wildfires can aid prevention efforts. This report analyses the causes,
+ timings and sizes of wildfires accross different counties in NC. The data is obtained from the United States Forest Service (USFS)
+ and spans accross 1992 to 2015.\n\n
+ The analyses in this report have been performed on a dataset containing the following categorical
+ variables: the county the fire occured in, it's fips code, the year and month the fire was
+ discovered in, the official cause with a matching cause code and the fire size binned into seven categories. The continuous variables 
+ studied are the discovery date of the fire, the fire size and the coordinates of the fire. The only missing values in the dataset are
+ for the variables county and the fips code. The county variable also contained several erroneousness entrees, all of which were correctable. Below the
+ first 5 rows of the dataset are depicted as an example.\n\n";
+run;
+title;
+
+/************************************************************************
+* 1. Import the NC data and look at the descriptive portion of the data *
+************************************************************************/
+* Set library;
+libname Project "H:\statcomp\Project";
+
+* 1. a. Import data;
+proc import OUT= project.FireNC
+            DATAFILE= "H:\statcomp\Project\fires_NC.csv"
+		  dbms=csv replace ;
+	getnames=yes;
+	datarow=2;
+	guessingrows=10000;
+run; 
+
+ods pdf exclude all;
+
+ods HTML select Contents.DataSet.Variables;
+* 1. b. Descriptive portion of the data; 
+title1 "Descriptive portion Wild fire NC region";
+proc contents data=project.FireNC;
+run;
+Title1;
+
+proc format;
+  value asmonth
+    1='January'  2='February'  3='March'      4='April'     5='May'        6='June'
+    7='July'     8='August'    9='September'  10='October'  11='November'  12='December';
+
+  value $cause_und
+    'Missing/Undefined' = 'Unknown cause';
+
+  value $countytxt
+    1='Alamance'   3='Alexander'  5='Alleghany'   7='Anson'     9='Ashe'       13='Beaufort' 15='Bertie'
+    17='Bladen'    25='Cabarrus'  29='Camden'     33='Caswell'  35='Catawba'   37='Chatham'  41='Chowan'
+    45='Cleveland' 47='Columbus'  51='Cumberland' 59='Davie'    61='Duplin'    63='Durham'   65='Edgecombe'
+    67='Forsyth'   69='Franklin'  71='Gaston'     73='Gates'    77='Granville' 79='Greene'   81='Guilford'
+    83='Halifax'   85='Harnett'   91='Hertford'   93='Hoke'     95='Hyde'      97='Iredell'  101='Johnston'
+    103='Jones'    105='Lee'      107='Lenoir'    109='Lincoln' 111='McDowell' 113='Macon'   115='Madison'
+    117='Martin'   121='Mitchell' 125='Moore'     127='Nash'    133='Onslow'   135='Orange'  137='Pamlico'
+    141='Pender'   145='Person'   147='Pitt'      149='Polk'    151='Randolph' 159='Rowan'   163='Sampson'
+    167='Stanly'   169='Stokes'   171='Surry'     173='Swain'   177='Tyrrell'  179='Union'   181='Vance'
+    183='Wake'     185='Warren'   189='Watauga'   191='Wayne'   195='Wilson'   197='Yadkin'  199='Yancey'
+    119='Mecklenburg'  123='Montgomery'   129='New Hanover'  131='Northampton'   139='Pasquotank'   143='Perquimans'
+    157='Rockingham'   161='Rutherford'   175='Transylvania' 187='Washington'    21, 021='Buncombe' 11, 011='Avery'
+    23, 023='Burke'    27, 027='Caldwell' 31, 031='Carteret' 39, 039='Cherokee'  43, 043='Clay'     49, 049='Craven'
+    57, 057='Davidson' 75, 075='Graham'   87, 087='Haywood'  89, 089='Henderson' 99, 099='Jackson'  19, 'Brunswick Co'='Brunswick'
+    53, 'Currituck Co'='Currituck'  55, 'Federal Land', 'Dare Bomb Ra'='Dare'  153, 'Richmond Cou'='Richmond'
+    155, 'Robeson Coun'='Robeson'   165, 'Scotland Cou'='Scotland'             193, 'Wilkes Count'='Wilkes';
+
+  value size_class
+	0<-0.25='A'	0.25<-<10='B' 10-<100='C' 100-<300='D' 300-<1000='E' 1000-<5000='F' 5000-high='G';
+run;
+
+data work.subset1; 
+	set project.FireNC; 
+	label 	FOD_ID = "Global unique identifie"
+			FPA_ID = "Unique identifier that contains information necessary to track back to the original record in the source dataset"
+			SOURCE_SYSTEM_TYPE = "Type of source database or system that the record was drawn from (federal, nonfederal, or interagency)"
+			SOURCE_SYSTEM = "Name of or other identifier for source database or system that the record was drawn from"
+			NWCG_REPORTING_AGENCY = "Active National Wildlife Coordinating Group (NWCG) Unit Identifier for the agency preparing the fire report (BIA = Bureau of Indian Affairs, BLM = Bureau of Land Management, BOR = Bureau of Reclamation, DOD = Department of Defense, DOE = Department of Energy, FS = Forest Service, FWS = Fish and Wildlife Service, IA = Interagency Organization, NPS = National Park Service, ST/C&L = State, County, or Local Organization, and TRIBE = Tribal Organization)" 
+			NWCG_REPORTING_UNIT_ID = "Active NWCG Unit Identifier for the unit preparing the fire report"
+			NWCG_REPORTING_UNIT_NAME = "Active NWCG Unit Name for the unit preparing the fire report."
+			SOURCE_REPORTING_UNIT = "Code for the agency unit preparing the fire report, based on code/name in the source dataset."
+			SOURCE_REPORTING_UNIT_NAME = "Name of reporting agency unit preparing the fire report, based on code/name in the source dataset."
+			LOCAL_FIRE_REPORT_ID = "Number or code that uniquely identifies an incident report for a particular reporting unit and a particular calendar year."
+			LOCAL_INCIDENT_ID = "Number or code that uniquely identifies an incident for a particular local fire management organization within a particular calendar year."
+			FIRE_CODE = "Code used within the interagency wildland fire community to track and compile cost information for emergency fire suppression."
+			FIRE_NAME = "Name of the incident, from the fire report (primary) or ICS-209 report (secondary)."
+			ICS_209_INCIDENT_NUMBER = "Incident (event) identifier, from the ICS-209 report."
+			ICS_209_NAME = "Name of the incident, from the ICS-209 report."
+			MTBS_ID = "Incident identifier, from the MTBS perimeter dataset."
+			MTBS_FIRE_NAME = "Name of the incident, from the MTBS perimeter dataset."
+			COMPLEX_NAME = "Name of the complex under which the fire was ultimately managed, when discernible."
+			FIRE_YEAR = "Calendar year in which the fire was discovered or confirmed to exist."
+			DISCOVERY_DATE = "Date on which the fire was discovered or confirmed to exist."
+			DISCOVERY_DOY = "Day of year on which the fire was discovered or confirmed to exist."
+			DISCOVERY_TIME = "Time of day that the fire was discovered or confirmed to exist."
+			STAT_CAUSE_CODE = "Code for the (statistical) cause of the fire."
+			STAT_CAUSE_DESCR = "Cause of the fire."
+			CONT_DATE = "Date on which the fire was declared contained or otherwise controlled (mm/dd/yyyy where mm=month, dd=day, and yyyy=year)."	
+			CONT_DOY = "Day of year on which the fire was declared contained or otherwise controlled."
+			CONT_TIME = "Time of day that the fire was declared contained or otherwise controlled (hhmm where hh=hour, mm=minutes)."
+			FIRE_SIZE = "Estimate of acres within the final perimeter of the fire."
+			FIRE_SIZE_CLASS = "Code for fire size based on the number of acres within the final fire perimeter expenditures (A=greater than 0 but less than or equal to 0.25 acres, B=0.26-9.9 acres, C=10.0-99.9 acres, D=100-299 acres, E=300 to 999 acres, F=1000 to 4999 acres, and G=5000+ acres)."
+			LATITUDE = "Latitude (NAD83) for point location of the fire (decimal degrees)."
+			LONGITUDE = "Longitude (NAD83) for point location of the fire (decimal degrees)."
+			OWNER_CODE = "Code for primary owner or entity responsible for managing the land at the point of origin of the fire at the time of the incident."
+			OWNER_DESCR = "Name of primary owner or entity responsible for managing the land at the point of origin of the fire at the time of the incident."
+			STATE = "Two-letter alphabetic code for the state in which the fire burned (or originated), based on the nominal designation in the fire report."
+			COUNTY = "County, or equivalent, in which the fire burned (or originated), based on nominal designation in the fire report."
+			FIPS_CODE = "Three-digit code from the Federal Information Process Standards (FIPS) publication 6-4 for representation of counties and equivalent entities."
+			FIPS_NAME = "County name from the FIPS publication 6-4 for representation of counties and equivalent entities.";
+	MONTH = month(datepart(DISCOVERY_DATE));
+	FIRE_SIZE_CLASS = FIRE_SIZE;
+	format	COUNTY $countytxt.
+			STAT_CAUSE_DESCR $cause_und.
+			MONTH asmonth3.
+			FIRE_SIZE_CLASS size_class.;
+run; 
+
+ods HTML select Contents.DataSet.Variables;
+title1 "Descriptive portion Wild fire NC region including label";
+proc contents data=work.subset1;
+run;
+Title1;
+
+/************************************************************************
+* 2. Create a permanent dataset  keeping following variables...      *
+************************************************************************/
+DATA Project.fnc;
+    set work.subset1;
+    keep state county fips_code DISCOVERY_DATE fire_year fire_size latitude longitude STAT_CAUSE_CODE STAT_CAUSE_DESCR fire_size_class month;
+RUN;
+
+ods pdf exclude none;
+
+* Display the first five rows of the new table;
+title1 "Top 5 Observations of the data set used for further analysis";
+proc print data = project.fnc (obs=5) LABEL;
+  label	month='Month' fire_year='Year' fire_size='Fire size' latitude='Latitude' longitude='Longitude' STAT_CAUSE_CODE='Cause code'
+		STATE='State' COUNTY='County' STAT_CAUSE_DESCR='Cause' fips_code='Fips code' FIRE_SIZE_CLASS='Fire size class' DISCOVERY_DATE='Discovery date';
+  format latitude comma10.2 longitude comma10.2 DISCOVERY_DATE datetime7.;;
+run;
+title1;
+
+ods text="\nData has been formatted: months and counties are formatted as text rather than numbers and labels with information are added to each variable. 
+ Above a sample of the data set that will be used for further analysis\n";
+run;
+
+* Subset of the 3 main causes (later questions);
+data Project.main3;
+	set Project.fnc;
+	where STAT_CAUSE_DESCR in ('Arson', 'Debris Burning', 'Equipment Use');
+run;
+
+/************************************************************************
+* 3. How many levels are there for each character variable?             *
+************************************************************************/
+%let categorical = state county fips_code fire_year stat_cause_code stat_cause_descr;
+%let continuous = discovery_date fire_size latitude longitude;
+
+ods select Freq.NLevels;
+* Amount of levels and missing values for each variable with a character format;
+title1  "Categorical Variables: amount of levels and missing values";
+proc freq data = Project.fnc nlevels;
+	tables &categorical;
+run;
+title1;
+
+/************************************************************************
+* 4. Check for inconsistencies in the data. Count missing values for    *
+* the numeric variables. Look for extreme observations. Report your     *
+* findings.                                                             *
+************************************************************************/
+
+* Display missing data pattern;
+ods pdf exclude all;
+ods HTML select MI.MissPattern;
+title1 "Missing data pattern numeric variables";
+proc mi data=Project.fnc nimpute=0;
+  var _numeric_;
+run;
+title1;
+
+* For all numeric variables display 3 extreme observations;
+title1 "Detect inconsistencies in data";
+proc univariate data=Project.fnc nextrobs=3;
+run;
+Title1;
+
+* Continuous variable distribution analysis - continuous variables;
+title1 "Continuous variable distribution analysis";
+proc univariate data=Project.fnc;
+   var fips_code fire_year fire_size latitude longitude ;
+   histogram fips_code fire_year fire_size latitude longitude /normal kernel;
+   inset n mean std/position = ne;
+run;
+Title1;
+
+/************************************************************************
+* 7. Investigate the months with the highest number of fires. Visualise *
+* this with a plot and display the month with 3 characters. Include the *
+* graph in your report and discuss.                                     *
+************************************************************************/
+
+ods PDF graphics on / width=4in height=2.5in;
+ods PDF select Freq.Table1.OneWayFreqPlots.FreqPlot;
+* Investigate the months with the highest number of fires;
+ods trace on;
+title1 "Number of fires per month";
+proc freq data=Project.fnc;
+	Tables MONTH / plots=freqplot(scale=freq) out = freqout;
+run;
+title1; 
+
+/************************************************************************
+* 8. Create a bar chart displaying the number of fires for each cause.  *
+* What is the major cause? Include the graph in your report and discuss.*
+************************************************************************/
+
+*optie 1;
+ods exclude none;run; 
+ods pdf startpage=no;
+title1 "Number of fires per cause";
+proc sgplot data=Project.fnc;
+	vbar STAT_CAUSE_DESCR / CATEGORYORDER=RESPDESC;
+	xaxis label = "Cause of fire";
+	Yaxis label = "frequency";
+run;
+Title;
+
+ods exclude all;run;
+
+* Optie 2;
+title1 "(statistical) Cause of fire: frequency plot";
+proc freq data=Project.fnc order=freq;
+ table STAT_CAUSE_DESCR / plots=freqplot;
+run;
+title1;
+
+ods pdf close;
