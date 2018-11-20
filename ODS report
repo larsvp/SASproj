@@ -18,9 +18,10 @@ ods pdf file='H:\statcomp\Project\SASproject_groupX.pdf' style=mystyle startpage
 footnote 'Page \{thispage}';
 
 title1 "SAS Homework: Wildfire analysis in the state of North Carolina \nHerlinde Wynendaele - Laurens Van Paemel - Steven Vandeleene - Bart Moens ";
-ods pdf text="\S={just=c}Questions 1 - 8: all students, Question 9-10: Steven, Questions 11-12: Bart, Questions: 13-14: Herlinde, Questions 15-16: Laurens, ODS report: Bart and Laurens\n\n";
-title2 "\n\nIntroduction";
-ods pdf text="\S={just=c}Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
+ods pdf text="\S={just=c}Questions 1 - 8: all students - Question 9-10: Steven - Questions 11-12: Bart - Questions: 13-14: Herlinde -
+ Questions 15-16: Laurens - ODS report: Bart and Laurens\n\n
+\S={just=c}\{style[font_size=18pt font_weight=bold] Introduction}\n
+\S={just=c}Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
  Wildfires harm both air and water quality while efforts to fight wildfires are expensive and put emergency personel in harms way.
  A better understanding of the dynamics behind destructive wildfires can aid prevention efforts. This report analyses the causes,
  timings and sizes of wildfires accross different counties in NC. The data is obtained from the United States Forest Service (USFS)
@@ -30,7 +31,8 @@ ods pdf text="\S={just=c}Every single year human lives, ecosystems and propertie
  two categorical variables have been added: fire sizes binned into 7 categories and the months the wildfires have been discovered in.
  The continuous variables studied are the discovery date of the fire, the fire size and the coordinates of the fire. The only missing
  values in the dataset are for the variables county and the fips code. The county variable also contained several erroneousness entrees,
- all of which were correctable. Below the first 5 rows of the dataset are depicted as an example.\n\n";
+ all of which were correctable. Below the first 5 rows of the dataset are depicted as an example.\n\n
+\S={just=c}\{style[font_size=14pt color=darkblue] The first five observations from the dataset}\n";
 run;
 ods pdf exclude all;
 ods noproctitle;
@@ -125,9 +127,9 @@ ods PDF select Print.Print;
 * Display the first five rows of the new table;
 title1 "Top 5 Observations of the data set used for further analysis";
 proc print data = project.fnc (obs=5) LABEL;
-  label	month='Month' fire_year='Year' fire_size='Fire size' latitude='Latitude' longitude='Longitude' STAT_CAUSE_CODE='Cause code'
+	label	month='Month' fire_year='Year' fire_size='Fire size' latitude='Latitude' longitude='Longitude' STAT_CAUSE_CODE='Cause code'
 		STATE='State' COUNTY='County' STAT_CAUSE_DESCR='Cause' fips_code='Fips code' FIRE_SIZE_CLASS='Fire size class' DISCOVERY_DATE='Discovery date';
-  format latitude comma10.2 longitude comma10.2 DISCOVERY_DATE datetime7.;
+	format latitude comma10.2 longitude comma10.2 DISCOVERY_DATE datetime7.;
 run;
 title1;
 
@@ -163,6 +165,7 @@ proc univariate data=Project.fnc nextrobs=3;
 run;
 Title1;
 
+ods PDF select Univariate.FIRE_SIZE.Histogram.Histogram;
 * Continuous variable distribution analysis;
 title1 "Continuous variable distribution analysis";
 proc univariate data=Project.fnc;
@@ -173,17 +176,16 @@ run;
 Title1;
 
 ods PDF text="\S={just=c}There do not appear to be any inconsistencies in any continuous variables. However, the size of the wildfires is skewed
- to the right, with a few unusually large wildfires. The most extreme observation being a wildfire which, according to the data, burned
+ to the right, with a few unusually large wildfires while most wildfires do not spread far. The most extreme observation being a wildfire which, according to the data, burned
  45294 acres of land. There's no reason to assume these extreme values are errors as they appear to be realistic.\n\n";
 
 /************** 7. Months with the highest number of fires *****************/
 ods graphics on / width=6in height=3.5in;
 ods PDF select Freq.Table1.OneWayFreqPlots.FreqPlot;
-title1 "Number of fires per month";
 proc freq data=Project.fnc;
+	title "Number of fires per month";
 	Tables MONTH / plots=freqplot(scale=freq) out = freqout;
 run;
-title1;
 ods PDF text="\S={just=c}During late winter and early spring wildfires occure more often while summer is the calmest period.\n\n";
 
 /**************** 8. Barchart: number of fires by cause ********************/
@@ -197,9 +199,9 @@ run;
 Title;
 ods PDF text="\S={just=c}By far the most common cause of wildfires is debris burning, which accounts for more than one third of all wildfires.
  A distant second is Arson. The third most common official cause is equipment use, which has barely been documented more often compared
- to wildfires caused by children. However, the large amount of unknown causes leaves some room for ambiguity. The category of causes
- 'miscellaneous', by assumption, consists of a multitude of causes that cannot be assigned to any other category and thus to hold data
- for numerous less common causes. The category of wildfires with an unknown cause is not taken into account. \n\n";
+ to wildfires caused by children. However, the large amount of unknown causes leaves some room for ambiguity. The category 'miscellaneous',
+ by assumption, consists of a multitude of causes that cannot be assigned to any other category and thus to hold data
+ for numerous less common causes. The category of wildfires with an unknown cause is not taken into account.\n";
 
 /**************** 9. Examining the fire size by county *********************/
 ods PDF exclude Means.Summary;
@@ -263,7 +265,7 @@ ods PDF text="\S={just=c}With the exception of lightning and fireworks, most cau
  while summer has the least occurences of wildfires. Fireworks and lightning go against the trend as they more often cause wildfires during summer.\n\n";
 
 /********* 12. Number of fires over time for the 3 main causes *************/
-ods graphics on / width=6in height=3.5in;
+ods graphics on / width=6in height=3in;
 ods PDF select SGPlot.SGPlot;
 proc sgplot data = Project.fnc; 
 	where STAT_CAUSE_DESCR in ("Debris Burning", "Arson", "Equipment Use") ; 
@@ -288,10 +290,11 @@ run;
 title;
 ods PDF text="\S={just=c}Eventhough debris burning causes more wildfires, those wildfires are on average a lot more contained compared
  to those caused by arson and equipment use. Wildfires caused by arson have torched on average 30 % more acres of land while debris
- burning accounts for more than double the amount of wildfires.\n";
+ burning accounts for more than double the amount of wildfires.\n\n";
 
 /**************** 14. Log transformed fire size ****************************/
 ods PDF exclude all;
+ods PDF text="\S={just=c}\{style[font_size=14pt color=darkblue] Goodness-of-Fit Tests for Normal Distribution}\n";
 
 * log transformed fire size and only the three main causes;
 DATA Project.fnclog;
@@ -302,7 +305,7 @@ RUN;
 
 ods PDF select GoodnessOfFit;
 * Is the log transformed fire size normally distributed for the 3 causes? graphically & formal testing;
-title "Is the log transformed fire size normally distributed for each of the top 3 causes?";
+title "Goodness-of-Fit Tests for Normal Distribution";
 proc univariate data=Project.fnclog noprint;
 	class STAT_CAUSE_DESCR;
 	var logtransform;
@@ -358,14 +361,15 @@ data _NULL_;
 	*Output the p-value to the log;
 	put ProbF pvalue6.4;
 run;
-ods PDF text="\S={just=c}The p-values are larger than 0.05 thus there's no significant difference between the fire sizes caused by any of the top three causes in 2015.\n\n";
-title2 "\nConclusion\n";
-ods PDF text="\S={just=c}The analysis of the wild fire occurrence in the state of North Carolina reported in this paper,
-	suggests that most fires occur in early spring while the fire frequency is the lowest during summer. 
-	Based on the data from 1992 until 2015, the major causes of these fires are burning debris, 
-	arson and equipment use which all follow the same seasonal trend in terms of occurrence. 
-	In absolute numbers, burning debris causes most fires while fires caused by arson are larger in average size. 
-	For fires registered in 2015, the average fire sizes originating from these major causes were not significantly 
-	different as formally shown by anova testing. Pender county has in average the largest fire size, followed by Craven and Carteret county. 
-	This average is however influenced by outliers (extremely large fires) which cause the confidence interval to be very wide. \n\n";
+ods PDF text="\S={just=c}With a p-value of 0.88 (>0.05) there is no significant difference between the fire sizes caused
+ by debris burning and equipment use in 2015. The same counts for the pairs of debris burning vs arson and equipment use
+ vs arson with respective p-values of 0.14 and 0.16 (>0.05). The visualization above clearly shows that the fire sizes between
+ debris burning and equipment use are fairly similar.\n\n\S={just=c}\{style[font_size=18pt font_weight=bold] Conclusion}\n
+The analysis of the wild fire occurrence in the state of North Carolina reported in this paper, suggests that most fires
+ occur in early spring while the fire frequency is the lowest during summer. Based on the data from 1992 until 2015, the
+ major causes of these fires are burning debris, arson and equipment use. Each of the top 3 causes follow the same seasonal trend in terms
+ of occurrence. In absolute numbers, burning debris causes most fires while fires caused by arson are on average larger in size. 
+ For fires registered in 2015, the average fire sizes originating from the top 3 causes were not significantly different
+ as formally shown by anova test. Pender county has on average the largest wildfires, followed by Craven and Carteret county. 
+ This average is however influenced by outliers (extremely large fires) which cause the confidence interval to be very wide.\n\n";
 ods pdf close;
