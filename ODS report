@@ -291,6 +291,7 @@ ods PDF text="\S={just=c}Eventhough debris burning causes more wildfires, those 
 
 /**************** 14. Log transformed fire size ****************************/
 ods PDF exclude all;
+
 * log transformed fire size and only the three main causes;
 DATA Project.fnclog;
 	SET Project.fnc;
@@ -298,7 +299,9 @@ DATA Project.fnclog;
 	where STAT_CAUSE_DESCR in ('Arson', 'Debris Burning', 'Equipment Use');
 RUN;
 
+ods PDF select GoodnessOfFit;
 * Is the log transformed fire size normally distributed for the 3 causes? graphically & formal testing;
+title "Is the log transformed fire size normally distributed for each of the top 3 causes?";
 proc univariate data=Project.fnclog noprint;
 	class STAT_CAUSE_DESCR;
 	var logtransform;
@@ -306,9 +309,9 @@ proc univariate data=Project.fnclog noprint;
 	qqplot logtransform/ nrow=3 normal odstitle="QQ-plot for the top 3 Fire causes"; 
 	inset n mean std / position=ne;
 run;
-* Conclusion: log transformed data is not normally distributed - P-value is < 0.05 (we may assume data is not normally distributed);
 
 *create rtf;
+ods PDF exclude all;
 ods rtf file='combine_graphandtable.rtf' startpage=no nogtitle nogfootnote;
 ods rtf select histogram qqplot GoodnessOfFit;
 ods graphics/ height=800px width=700px;
@@ -323,7 +326,7 @@ run;
 ods text = "We conclude that the log transformed fire size distributions are not normally distributed";
 title;
 ods rtf close;
-ods PDF text="\S={just=c}-------------We conclude that the log transformed fire size distributions are not normally distributed---------------\n\n";
+ods PDF text="\S={just=c}The log transformed fire size distributions are not normally distributed because the p-value is smaller than 0.05.\n\n";
 
 /*** 15. Top 3 causes: significant difference in the fire size in 2015? ****/
 ods PDF select GLM.LSMEANS.STAT_CAUSE_DESCR.FIRE_SIZE.DiffPlot;
