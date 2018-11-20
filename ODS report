@@ -29,7 +29,9 @@ ods pdf text="\S={just=c}Every single year human lives, ecosystems and propertie
  discovered in, the official cause with a matching cause code and the fire size binned into seven categories. The continuous variables 
  studied are the discovery date of the fire, the fire size and the coordinates of the fire. The only missing values in the dataset are
  for the variables county and the fips code. The county variable also contained several erroneousness entrees, all of which were correctable. Below the
- first 5 rows of the dataset are depicted as an example.\n\n";
+ first 5 rows of the dataset are depicted as an example.\n\n
+ Questions 1 - 8: all students, Question 9-10: Steven, Questions 11-12: Bart, Questions: 13-14: Herlinde, Questions 15-16: Laurens\n\n
+ ODS report: Bart and Laurens";
 run;
 title;
 
@@ -352,7 +354,7 @@ ods PDF text="\S={just=c}The analysis of the wild fire occurrence in the state o
 	arson and equipment use which all follow the same seasonal trend in terms of occurrence. 
 	In absolute numbers, burning debris causes most fires while fires caused by arson are larger in average size. 
 	For fires registered in 2015, the average fire sizes originating from these major causes were not significantly 
-	different as formally shown by anova testing. \n\nPender county has in average the largest fire size, followed by Craven and Carteret county. 
+	different as formally shown by anova testing.\n\n Pender county has in average the largest fire size, followed by Craven and Carteret county. 
 	This average is however influenced by outliers (extremely large fires) which cause the confidence interval to be very wide. \n\n";
 title2;
 ods pdf close;
