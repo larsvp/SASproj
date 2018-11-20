@@ -346,6 +346,13 @@ data _NULL_;
 run;
 ods PDF text="\S={just=c}The p-values are larger than 0.05 thus there's no significant difference between the fire sizes caused by any of the top three causes in 2015.\n\n";
 title2 "Conclusion\n\n";
-ods PDF text="\S={just=c}Conclusion....................\n\n";
+ods PDF text="\S={just=c}The analysis of the wild fire occurrence in the state of North Carolina reported in this paper,
+	suggests that most fires occur in early spring while the fire frequency is the lowest during summer. 
+	Based on the data from 1992 until 2015, the major causes of these fires are burning debris, 
+	arson and equipment use which all follow the same seasonal trend in terms of occurrence. 
+	In absolute numbers, burning debris causes most fires while fires caused by arson are larger in average size. 
+	For fires registered in 2015, the average fire sizes originating from these major causes were not significantly 
+	different as formally shown by anova testing. \n\nPender county has in average the largest fire size, followed by Craven and Carteret county. 
+	This average is however influenced by outliers (extremely large fires) which cause the confidence interval to be very wide. \n\n";
 title2;
 ods pdf close;
