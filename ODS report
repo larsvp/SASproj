@@ -365,7 +365,7 @@ ods PDF text="\S={just=c}With a p-value of 0.88 (>0.05) there is no significant 
  by debris burning and equipment use in 2015. The same counts for the pairs of debris burning vs arson and equipment use
  vs arson with respective p-values of 0.14 and 0.16 (>0.05). The visualization above clearly shows that the fire sizes between
  debris burning and equipment use are fairly similar.\n\n\S={just=c}\{style[font_size=18pt font_weight=bold] Conclusion}\n
-The analysis of the wild fire occurrence in the state of North Carolina reported in this paper, suggests that most fires
+\S={just=c}The analysis of the wild fire occurrence in the state of North Carolina reported in this paper, suggests that most fires
  occur in early spring while the fire frequency is the lowest during summer. Based on the data from 1992 until 2015, the
  major causes of these fires are burning debris, arson and equipment use. Each of the top 3 causes follow the same seasonal trend in terms
  of occurrence. In absolute numbers, burning debris causes most fires while fires caused by arson are on average larger in size. 
