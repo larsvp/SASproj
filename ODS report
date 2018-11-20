@@ -318,10 +318,10 @@ proc univariate data=Project.fnclog noprint;
 	qqplot logtransform/ nrow=3 normal odstitle="QQ-plot for the top 3 Fire causes"; 
 	inset n mean std / position=ne;
 run;
-ods text = "We conclude the log transformed fire size distribution are not normally distributed";
+ods text = "We conclude that the log transformed fire size distributions are not normally distributed";
 title;
 ods rtf close;
-ods PDF text="\S={just=c}-------------Insert text for 14 here---------------\n\n";
+ods PDF text="\S={just=c}-------------We conclude that the log transformed fire size distributions are not normally distributed---------------\n\n";
 
 /*** 15. Top 3 causes: significant difference in the fire size in 2015? ****/
 ods PDF select GLM.LSMEANS.STAT_CAUSE_DESCR.FIRE_SIZE.DiffPlot;
