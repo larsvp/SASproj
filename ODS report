@@ -82,7 +82,7 @@ proc format;
     53, 'Currituck Co'='Currituck'  55, 'Federal Land', 'Dare Bomb Ra'='Dare'  153, 'Richmond Cou'='Richmond'
     155, 'Robeson Coun'='Robeson'   165, 'Scotland Cou'='Scotland'             193, 'Wilkes Count'='Wilkes';
 
-  value $size_class
+  value size_class
 	0<-0.25 = 'A'	0.25<-<10 = 'B' 10-<100 = 'C' 100-<300 = 'D' 300-<1000 = 'E' 1000-<5000 = 'F' 5000-high = 'G';
 run;
 
@@ -94,7 +94,7 @@ data work.subset1;
 	format	COUNTY $countytxt.
 			STAT_CAUSE_DESCR $cause_und.
 			MONTH asmonth3.
-			FIRE_SIZE_CLASS $size_class.;
+			FIRE_SIZE_CLASS size_class.;
 	label 	FIRE_YEAR = "Calendar year in which the fire was discovered or confirmed to exist."
 			MONTH = "The month in which the fire was discovered or confirmed to exist."
 			DISCOVERY_DATE = "Date on which the fire was discovered or confirmed to exist."
