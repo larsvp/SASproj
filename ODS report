@@ -323,10 +323,18 @@ proc univariate data=Project.fnclog noprint;
 	qqplot logtransform/ nrow=3 normal odstitle="QQ-plot for the top 3 Fire causes"; 
 	inset n mean std / position=ne;
 run;
-ods text = "We conclude that the log transformed fire size distributions are not normally distributed";
+ods text = "We conclude that the log transformed fire size distributions are not normally distributed: 
+visually we do not see a normal distribution when looking at the histograms or the QQ-plots. In addition, 
+for the Goodness of Fit tests, we see p-values that are lower than 0.05 (the null hypothesis indicates a normal distribution, 
+and the alternative hypothesis indicates a distribution deviating from normality). Based on these p-values, 
+we reject the null hypothesis & conclude that the distribution deviates from a normal distribution.";
 title;
 ods rtf close;
-ods PDF text="\S={just=c}The log transformed fire size distributions are not normally distributed because the p-value is smaller than 0.05.\n\n";
+ods PDF text="\S={just=c}We conclude that the log transformed fire size distributions are not normally distributed: 
+visually we do not see a normal distribution when looking at the histograms or the QQ-plots. In addition, 
+for the Goodness of Fit tests, we see p-values that are lower than 0.05 (the null hypothesis indicates a normal distribution, 
+and the alternative hypothesis indicates a distribution deviating from normality). Based on these p-values, we reject the 
+null hypothesis & conclude that the distribution deviates from a normal distribution.\n\n";
 
 /*** 15. Top 3 causes: significant difference in the fire size in 2015? ****/
 ods PDF select GLM.LSMEANS.STAT_CAUSE_DESCR.FIRE_SIZE.DiffPlot;
