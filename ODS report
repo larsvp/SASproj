@@ -14,35 +14,33 @@ proc template;
 run;
 
 ods escapechar='\';
-ods pdf file='H:\statcomp\Project\SASproject_groupX.pdf' style=mystyle startpage=no;
+ods pdf file='H:\statcomp\Project\SASproject_groupX.pdf' style=mystyle startpage=no nogfootnote;
+footnote 'Page \{thispage}';
 
 title1 "SAS Homework: Wildfire analysis in the state of North Carolina \nHerlinde Wynendaele - Laurens Van Paemel - Steven Vandeleene - Bart Moens ";
-footnote 'Page \{thispage}';
+ods pdf text="\S={just=c}Questions 1 - 8: all students, Question 9-10: Steven, Questions 11-12: Bart, Questions: 13-14: Herlinde, Questions 15-16: Laurens, ODS report: Bart and Laurens\n\n";
 title2 "\n\nIntroduction";
 ods pdf text="\S={just=c}Every single year human lives, ecosystems and properties are at risk due to wildfires in the state of North-Carolina (NC).
  Wildfires harm both air and water quality while efforts to fight wildfires are expensive and put emergency personel in harms way.
  A better understanding of the dynamics behind destructive wildfires can aid prevention efforts. This report analyses the causes,
  timings and sizes of wildfires accross different counties in NC. The data is obtained from the United States Forest Service (USFS)
  and spans accross 1992 to 2015.\n\n
- The analyses in this report have been performed on a dataset containing the following categorical
- variables: the county the fire occured in, it's fips code, the year and month the fire was
- discovered in, the official cause with a matching cause code and the fire size binned into seven categories. The continuous variables 
- studied are the discovery date of the fire, the fire size and the coordinates of the fire. The only missing values in the dataset are
- for the variables county and the fips code. The county variable also contained several erroneousness entrees, all of which were correctable. Below the
- first 5 rows of the dataset are depicted as an example.\n\n
- Questions 1 - 8: all students, Question 9-10: Steven, Questions 11-12: Bart, Questions: 13-14: Herlinde, Questions 15-16: Laurens\n\n
- ODS report: Bart and Laurens";
+ The analyses in this report have been performed on a dataset containing the following categorical variables: the county the fire
+ occured in, it's fips code, the year the fire was discovered in and the official cause with a matching cause code. Additionally
+ two categorical variables have been added: fire sizes binned into 7 categories and the months the wildfires have been discovered in.
+ The continuous variables studied are the discovery date of the fire, the fire size and the coordinates of the fire. The only missing
+ values in the dataset are for the variables county and the fips code. The county variable also contained several erroneousness entrees,
+ all of which were correctable. Below the first 5 rows of the dataset are depicted as an example.\n\n";
 run;
-title;
-
 ods pdf exclude all;
+ods noproctitle;
 
 /****************** 1. Importing the data *********************************/
 * Set library;
 libname Project "H:\statcomp\Project";
 
 * Import data;
-proc import OUT= project.FireNC DATAFILE= "H:\statcomp\Project\fires_NC.csv" dbms=csv replace;
+proc import OUT=project.FireNC DATAFILE= "H:\statcomp\Project\fires_NC.csv" dbms=csv replace;
 	getnames=yes;
 	datarow=2;
 	guessingrows=10000;
@@ -82,14 +80,21 @@ proc format;
     53, 'Currituck Co'='Currituck'  55, 'Federal Land', 'Dare Bomb Ra'='Dare'  153, 'Richmond Cou'='Richmond'
     155, 'Robeson Coun'='Robeson'   165, 'Scotland Cou'='Scotland'             193, 'Wilkes Count'='Wilkes';
 
-  value size_class
+  value $size_class
 	0<-0.25 = 'A'	0.25<-<10 = 'B' 10-<100 = 'C' 100-<300 = 'D' 300-<1000 = 'E' 1000-<5000 = 'F' 5000-high = 'G';
 run;
 
 /*********** Label the data and apply formatting ***********************/
 data work.subset1; 
-	set project.FireNC; 
+	set project.FireNC (drop=FIRE_SIZE_CLASS);
+	MONTH = month(datepart(DISCOVERY_DATE));
+	FIRE_SIZE_CLASS = FIRE_SIZE;
+	format	COUNTY $countytxt.
+			STAT_CAUSE_DESCR $cause_und.
+			MONTH asmonth3.
+			FIRE_SIZE_CLASS $size_class.;
 	label 	FIRE_YEAR = "Calendar year in which the fire was discovered or confirmed to exist."
+			MONTH = "The month in which the fire was discovered or confirmed to exist."
 			DISCOVERY_DATE = "Date on which the fire was discovered or confirmed to exist."
 			STAT_CAUSE_CODE = "Code for the (statistical) cause of the fire."
 			STAT_CAUSE_DESCR = "Cause of the fire."
@@ -100,10 +105,6 @@ data work.subset1;
 			STATE = "Two-letter alphabetic code for the state in which the fire burned (or originated), based on the nominal designation in the fire report."
 			COUNTY = "County, or equivalent, in which the fire burned (or originated), based on nominal designation in the fire report."
 			FIPS_CODE = "Three-digit code from the Federal Information Process Standards (FIPS) publication 6-4 for representation of counties and equivalent entities.";
-	MONTH = month(datepart(DISCOVERY_DATE));
-	format	COUNTY $countytxt.
-			STAT_CAUSE_DESCR $cause_und.
-			MONTH asmonth3.;
 run; 
 
 * Descriptive portion of the data; 
@@ -271,7 +272,7 @@ proc sgplot data = Project.fnc;
 run;
 title;
 ods PDF text="\S={just=c}The amount of wildfires due to debris burning and arson has been on the decline while the amount
- of wildfires caused by equipment use seems to be quite steady over time.\n\n";
+ of wildfires caused by equipment use seems to be quite steady over time.\n";
 
 /* 13. Top 3 causes: number of fires, total fire size, average fire size and max fire size */
 ods PDF select Tabulate.Report.Table startpage=no;
@@ -280,14 +281,14 @@ proc tabulate data = Project.fnc format = 8.3  S=[foreground=black just=c cellwi
 	where STAT_CAUSE_DESCR in ('Arson', 'Debris Burning', 'Equipment Use');
 	class STAT_CAUSE_DESCR/order=freq  style={font_style=italic} ;
 	var FIRE_SIZE/style={font_style=italic};
-	table STAT_CAUSE_DESCR, FIRE_SIZE*(N sum mean max) / style={width=5in};
+	table STAT_CAUSE_DESCR, FIRE_SIZE*(N sum mean max) / style={width=5.5in};
 	label STAT_CAUSE_DESCR='Top 3 causes of fire' FIRE_SIZE='Fire Size: Estimate of acres within the final perimeter of the fire' ; 
 	keylabel N='Number of fires' Sum='Total size' Mean='Average size' Max='Maximum size'; 
 run;
 title;
 ods PDF text="\S={just=c}Eventhough debris burning causes more wildfires, those wildfires are on average a lot more contained compared
  to those caused by arson and equipment use. Wildfires caused by arson have torched on average 30 % more acres of land while debris
- burning accounts for more than double the amount of wildfires.\n\n";
+ burning accounts for more than double the amount of wildfires.\n";
 
 /**************** 14. Log transformed fire size ****************************/
 ods PDF exclude all;
@@ -323,18 +324,18 @@ proc univariate data=Project.fnclog noprint;
 	qqplot logtransform/ nrow=3 normal odstitle="QQ-plot for the top 3 Fire causes"; 
 	inset n mean std / position=ne;
 run;
-ods text = "We conclude that the log transformed fire size distributions are not normally distributed: 
-visually we do not see a normal distribution when looking at the histograms or the QQ-plots. In addition, 
-for the Goodness of Fit tests, we see p-values that are lower than 0.05 (the null hypothesis indicates a normal distribution, 
-and the alternative hypothesis indicates a distribution deviating from normality). Based on these p-values, 
-we reject the null hypothesis & conclude that the distribution deviates from a normal distribution.";
+ods text = "The log transformed fire size distributions are not normally distributed:
+ visually no normal distribution can be seen when looking at the histograms or the QQ-plots. In addition,
+ for the Goodness of Fit tests, the p-values are lower than 0.05 (the null hypothesis indicates a normal distribution while
+ the alternative hypothesis indicates a distribution deviating from normality). Based on these p-values, the
+ null hypothesis is rejected, leading to the conclusion that the distribution deviates from a normal distribution.";
 title;
 ods rtf close;
-ods PDF text="\S={just=c}We conclude that the log transformed fire size distributions are not normally distributed: 
-visually we do not see a normal distribution when looking at the histograms or the QQ-plots. In addition, 
-for the Goodness of Fit tests, we see p-values that are lower than 0.05 (the null hypothesis indicates a normal distribution, 
-and the alternative hypothesis indicates a distribution deviating from normality). Based on these p-values, we reject the 
-null hypothesis & conclude that the distribution deviates from a normal distribution.\n\n";
+ods PDF text="\S={just=c}The log transformed fire size distributions are not normally distributed:
+ visually no normal distribution can be seen when looking at the histograms or the QQ-plots. In addition,
+ for the Goodness of Fit tests, the p-values are lower than 0.05 (the null hypothesis indicates a normal distribution while
+ the alternative hypothesis indicates a distribution deviating from normality). Based on these p-values, the
+ null hypothesis is rejected, leading to the conclusion that the distribution deviates from a normal distribution.\n\n";
 
 /*** 15. Top 3 causes: significant difference in the fire size in 2015? ****/
 ods PDF select GLM.LSMEANS.STAT_CAUSE_DESCR.FIRE_SIZE.DiffPlot;
@@ -358,14 +359,13 @@ data _NULL_;
 	put ProbF pvalue6.4;
 run;
 ods PDF text="\S={just=c}The p-values are larger than 0.05 thus there's no significant difference between the fire sizes caused by any of the top three causes in 2015.\n\n";
-title2 "Conclusion\n\n";
+title2 "\nConclusion\n";
 ods PDF text="\S={just=c}The analysis of the wild fire occurrence in the state of North Carolina reported in this paper,
 	suggests that most fires occur in early spring while the fire frequency is the lowest during summer. 
 	Based on the data from 1992 until 2015, the major causes of these fires are burning debris, 
 	arson and equipment use which all follow the same seasonal trend in terms of occurrence. 
 	In absolute numbers, burning debris causes most fires while fires caused by arson are larger in average size. 
 	For fires registered in 2015, the average fire sizes originating from these major causes were not significantly 
-	different as formally shown by anova testing.\n\n Pender county has in average the largest fire size, followed by Craven and Carteret county. 
+	different as formally shown by anova testing. Pender county has in average the largest fire size, followed by Craven and Carteret county. 
 	This average is however influenced by outliers (extremely large fires) which cause the confidence interval to be very wide. \n\n";
-title2;
 ods pdf close;
