@@ -271,7 +271,7 @@ proc sgplot data = Project.fnc;
 run;
 title;
 ods PDF text="\S={just=c}The amount of wildfires due to debris burning and arson has been on the decline while the amount
- of wildfires caused by equipment use seem to be quite steady over time.\n\n";
+ of wildfires caused by equipment use seems to be quite steady over time.\n\n";
 
 /* 13. Top 3 causes: number of fires, total fire size, average fire size and max fire size */
 ods PDF select Tabulate.Report.Table startpage=no;
